@@ -1,16 +1,16 @@
 from random import randint, choice
 from threading import Thread
 from time import sleep
+from visual import draw
 
 
-class Simulation():
-    total_floors = 7
+class Simulation:
+    total_floors = 6
     total_elevators = 3
     max_people_per_step = 2
-    max_people_in_hotel = 10
-    max_people_generated = 20
+    max_people_generated = 50
 
-    step = 0.1  # each elevator step is 1 second
+    step = 0.5  # each elevator step is 1 second
 
     def __init__(self, mode, visual=True):
         self.mode = mode
@@ -40,7 +40,6 @@ class Simulation():
             direction = randint(-1, Simulation.total_floors)
             if direction >= 0:
                 direction = 1
-            # testing = randint(-1,Simulation.total_floors - 1)
             self.floors['0'].people.append(Person(direction=direction))
             self.total_people_count += 1
             self.available_people_count += 1
@@ -215,7 +214,6 @@ class Simulation():
             print()
 
     def start_elevator(self):
-        first_time = True
         while self.available_people_count or self.total_people_count < Simulation.max_people_generated:
             # Testing
 
@@ -230,6 +228,7 @@ class Simulation():
                 elevator.set_relevant_direction()
             if self.visual:
                 self.visualize()
+                draw(elevator.curr_floor for elevator in self.elevators)
             self.make_people_leave_floors()
             self.people_floors_to_elev()
             self.calculate_wait_time()
@@ -239,6 +238,7 @@ class Simulation():
 
             if self.visual:
                 sleep(Simulation.step)
+                draw(elevator.curr_floor for elevator in self.elevators)
                 self.visualize()
 
             elev_thread = []
@@ -403,3 +403,17 @@ class Floor:
                     tmp_person_choice.direction = -1
                 else:
                     tmp_person_choice.direction = choice((-1, -1, -1, 1))
+
+def generate_people(simulations):
+    while simulations[0].available_people_count or \
+            simulations[0].total_people_count < Simulation.max_people_generated:
+        #print("bla")
+        for _ in range(0, randint(0, Simulation.max_people_per_step)):
+            direction = randint(-1, Simulation.total_floors)
+            if direction >= 0:
+                direction = 1
+            for simulation in simulations:
+                simulation.floors['0'].people.append(Person(direction=direction))
+                simulation.total_people_count += 1
+                simulation.available_people_count += 1
+        sleep(Simulation.step)
