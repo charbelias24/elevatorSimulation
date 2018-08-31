@@ -251,7 +251,7 @@ class Simulation:
             if self.visual:
                 sleep(Simulation.step)
                 self.display_results()
-                self.visualize()
+                #self.visualize()
 
             elev_thread = []
             for i, elevator in enumerate(self.elevators):
