@@ -3,13 +3,11 @@ from threading import Thread
 from time import sleep
 
 
-
-
 class Simulation:
     total_floors = 6
     total_elevators = 3
     max_people_per_step = 2
-    max_people_generated = 50
+    max_people_generated = 40
 
     step = 0.5  # each elevator step is 1 second
 
@@ -101,6 +99,7 @@ class Simulation:
                 if elevator.people == 0:
                     elevator.curr_dest.clear()
                     elevator.curr_dest.add(0)
+                    print("'" * 40)
                     return elevator
         return 0
 
@@ -230,8 +229,8 @@ class Simulation:
         while self.available_people_count or self.total_people_count < Simulation.max_people_generated:
             # Testing
 
-            if self.total_people_count < Simulation.max_people_generated:
-                self.generate_people_at_gf()
+            #if self.total_people_count < Simulation.max_people_generated:
+             #   self.generate_people_at_gf()
 
             # Needs fixingg
             #if Person.total_count:
