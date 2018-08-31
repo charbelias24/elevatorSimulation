@@ -1,6 +1,8 @@
 import sys, pygame
 import time
 
+#maxFloors = int(input ("please enter the height of the building : "))
+
 pygame.init()
 
 size = width, height = 720, 720
@@ -29,9 +31,9 @@ def draw(elevators_floor):
     drawBuilding("optimize", maxFloors)
     drawBuilding("normal", maxFloors)
 
-    font = pygame.font.SysFont('Calibri', 25, True, False)
-    text = font.render("My text",True, black)
-    screen.blit(text, [250, 250])
+    #font = pygame.font.SysFont('Calibri', 25, True, False)
+    #text = font.render("My text",True, black)
+    #screen.blit(text, [250, 250])
 
     x = base_x + 5
     y = base_y + 2
@@ -74,3 +76,11 @@ def drawBuilding(mode, maxFloors):
         screen.blit(floor, (x, (base_y - 12) - (i * 12)))
     screen.blit(roof, (x, (base_y - 12) - ((maxFloors + 1) * 12)))
     screen.blit(floor, (x, (base_y + 40)))
+'''
+while True:
+    for i in range (maxFloors):
+        for j in range (maxFloors):
+            for k in range (maxFloors):
+                draw([i,j,k])
+
+'''
