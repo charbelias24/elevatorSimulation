@@ -26,7 +26,7 @@ class Visual:
                 if event.type == pygame.QUIT: sys.exit()
 
             self.screen.fill(self.white)
-            #self.screen.blit(self.background)
+            self.screen.blit(self.background)
             self.draw_building(optimized=0)
             self.draw_building(optimized=1)
 
