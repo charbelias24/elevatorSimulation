@@ -94,14 +94,26 @@ class Simulation:
 
         return best_elevator
 
+    def there_is_elev_at_gf(self, floor, person):
+        list_of_elevators_at_gf = list(filter(lambda x:x.curr_floor == 0, self.elevators))
+        if not list_of_elevators_at_gf:
+            for elevator in list(filter(lambda x:x.curr_floor != 0, self.elevators)):
+                if elevator.people == 0:
+                    elevator.curr_dest.clear()
+                    elevator.curr_dest.add(0)
+                    return elevator
+        return 0
+
     def elevator_available(self, floor, person):
         """ returns the best elevator for each person
         """
-        priority_elevators = [self.there_is_elev_on_person_floor,
+        priority_elevators = [self.there_is_elev_at_gf,
+                              self.there_is_elev_on_person_floor,
                               self.there_is_elev_on_same_route_as_person,
                               self.there_is_elev_below_or_above_person,
                               self.there_is_elev_none_of_above]
-
+        #if self.mode == 1:
+        #    priority_elevators.remove(self.there_is_elev_below_or_above_person)
         for choose_elevator in priority_elevators:
             best_elevator = choose_elevator(floor, person)
             if best_elevator:
@@ -229,7 +241,7 @@ class Simulation:
                 elevator.set_relevant_direction()
             if self.visual:
                 self.visualize()
-                #draw()
+
             self.make_people_leave_floors()
             self.people_floors_to_elev()
             self.calculate_wait_time()
@@ -239,7 +251,6 @@ class Simulation:
 
             if self.visual:
                 sleep(Simulation.step)
-                #draw(elevator.curr_floor for elevator in self.elevators)
                 self.visualize()
 
             elev_thread = []
