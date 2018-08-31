@@ -12,7 +12,7 @@ class Visual:
         self.white = 255, 255, 255
         self.black = 255, 255, 255
         self.base_y = 453
-        self.base_x = 120
+        self.base_x = 135
         self.screen = pygame.display.set_mode(self.size)
         self.base = pygame.image.load("pictures/base copy.png")
         self.floor = pygame.image.load("pictures/floor copy.png")
@@ -38,11 +38,11 @@ class Visual:
             self.draw_floor_people(optimized=0)
             self.draw_floor_people(optimized=1)
 
+            #self.write_info(optimized=0)
+            #self.write_info(optimized=1)
+
             self.draw_elevator_people(optimized=0)
             self.draw_elevator_people(optimized=1)
-
-            self.write_info(optimized=0)
-            self.write_info(optimized=1)
 
             self.draw_elevator_square(optimized=0)
             self.draw_elevator_square(optimized=1)
@@ -85,11 +85,11 @@ class Visual:
 
         average_waiting_timeGF = font.render(str(1), True, self.black)
         average_waiting_time = font.render(str(1), True, self.black)
-        total_steps = font.render(str(len(1), True, self.black)
+        total_steps = font.render(str(1), True, self.black)
 
-        self.screen.blit(("Average wait time at GF = " + average_waiting_timeGF), [(self.base_x  + x_addition), (self.base_y + 25)])
-        self.screen.blit("Average wait time at OTHER = " + average_waiting_time, [self.base_x  + x_addition, self.base_y + 25])
-        self.screen.blit("Total Steps : " + average_waiting_time, [self.base_x  + x_addition, self.base_y + 25])
+        self.screen.blit(("Average wait time at GF = " + average_waiting_timeGF), [(self.base_x  + x_addition), (self.base_y + 50)])
+        self.screen.blit("Average wait time at OTHER = " + average_waiting_time, [self.base_x  + x_addition, self.base_y + 50])
+        self.screen.blit("Total Steps : " + average_waiting_time, [self.base_x  + x_addition, self.base_y + 50])
 
     def draw_building(self, optimized):
         x = self.base_x + self.x_addition if optimized else self.base_x
