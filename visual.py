@@ -29,9 +29,8 @@ class Visual:
             self.draw_building(optimized=0)
             self.draw_building(optimized=1)
 
-            #font = pygame.font.SysFont('Arial', 25 , True, False)
-            #text = font.render("MTASDA", True ,self.black)
-            #self.screen.blit(text, [250,250])
+            self.draw_floor_number(optimized=0)
+            self.draw_floor_number(optimized=1)
 
             self.draw_elevator_square(optimized=0)
             self.draw_elevator_square(optimized=1)
@@ -39,21 +38,23 @@ class Visual:
             pygame.display.flip()
             sleep(0.5)
 
-    def draw_floor_people(self, optimized):
+    def draw_floor_number(self, optimized):
         floor_people = {}
         font = pygame.font.SysFont('Arial', 14, True, False)
         x_addition = self.x_addition if optimized else 0
+        tmp = len(self.simulations[optimized].floors.values())
+
         for i, floor in enumerate(self.simulations[optimized].floors.values()):
-            floor_people[i] = font.render(str(floor.floor_nb), True, self.black)
-            self.screen.blit(floor_people[i], [self.base_x - 10 + x_addition, ((self.base_y - 10) - 12 * i)])
+            floor_people[i] = font.render(str(tmp - floor.floor_nb - 3), True, self.black)
+            self.screen.blit(floor_people[i], [self.base_x - 15 + x_addition, ((self.base_y + 12) - 12 * i)])
 
     def draw_building(self, optimized):
         x = self.base_x + self.x_addition if optimized else self.base_x
         self.screen.blit(self.base, (x - 4, self.base_y))
 
-        for i in range (0, Simulation.total_floors):
+        for i in range (0, Simulation.total_floors - 1):
             self.screen.blit(self.floor, (x, (self.base_y - 12) - (i * 12)))
-        self.screen.blit(self.roof, (x, (self.base_y - 12) - ((Simulation.total_floors + 1) * 12)))
+        self.screen.blit(self.roof, (x, (self.base_y - 12) - ((Simulation.total_floors) * 12)))
         self.screen.blit(self.floor, (x, (self.base_y + 40)))
 
         #self.draw_floor_people(optimized)
