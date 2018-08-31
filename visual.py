@@ -1,40 +1,51 @@
+from structure import *
 import sys, pygame
+
 import time
 
-maxFloors = int(input ("please enter the height of the building : "))
+#maxFloors = int(input ("please enter the height of the building : "))
 
 class Visual:
-    def __init__(self):
+    def __init__(self, simulations):
         pygame.init()
+        self.simulations = simulations
         self.size = width, height = 720, 720
         self.speed = [2, 2]
         self.white = 255, 255, 255
         self.black = 0, 0, 0
         self.base_y = 500
         self.base_x = 160
-        self.screen = pygame.display.set_mode(size)
+        self.screen = pygame.display.set_mode(self.size)
         self.base = pygame.image.load("pictures/base.png")
         self.floor = pygame.image.load("pictures/floor.png")
         self.roof = pygame.image.load("pictures/roof.png")
-        self.font = pygame.font.SysFont("Calibri", 14, True, False)
+        #self.font = pygame.font.SysFont("Calibri", 14, True, False)
 
-    def draw(self, simulations):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: sys.exit()
-        screen.fill(white)
+    def draw(self):
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT: sys.exit()
+            self.screen.fill(self.white)
 
-        draw_building(simulation[0], optimized=False)
-        draw_building(simluation[1], optimized=True)
+            self.draw_building(optimized=0)
+            self.draw_building(optimized=1)
 
-    def draw_building(self, simulation, optimized):
-        x = base_x + 350 if optimized else base_x
-        screen.blit(base, (x - 4, base_y))
-        for i in range (0, simulation.total_floors):
-            screen.blit(floor, (x, (base_y - 12) - (i * 12)))
-        screen.blit(roof, (x, (base_y - 12) - ((maxFloors + 1) * 12)))
-        screen.blit(floor, (x, (base_y + 40)))
+            self.draw_elevator_square(optimized=0)
+            self.draw_elevator_square(optimized=1)
 
-    def draw_elevator_square(self):
+            pygame.display.flip()
+            sleep(0.5)
+
+    def draw_building(self, optimized):
+        x = self.base_x + 350 if optimized else self.base_x
+        self.screen.blit(self.base, (x - 4, self.base_y))
+
+        for i in range (0, Simulation.total_floors):
+            self.screen.blit(self.floor, (x, (self.base_y - 12) - (i * 12)))
+        self.screen.blit(self.roof, (x, (self.base_y - 12) - ((Simulation.total_floors + 1) * 12)))
+        self.screen.blit(self.floor, (x, (self.base_y + 40)))
+
+    def draw_elevator_square(self, optimized):
         x = self.base_x + 5
         y = self.base_y + 2
 
@@ -47,24 +58,20 @@ class Visual:
         y_pos = [y]*3
         x_pos = [x]*3
 
-        for i, elevator_floor in enumerate(elevators_floor):
+        for i, elevator_floor in enumerate(x.curr_floor for x in self.simulations[optimized].elevators):
             y_pos[i] -= elevator_floor * y_move
 
+        x_addition = 350 if optimized else 0
+        for i in range(3):
+            x_pos[i] += i * x_move + x_addition
 
+        elevator_rect = [0]*3
 
+        for i in range(3):
+            elevator_rect[i] = pygame.rect.Rect((x_pos[i], y_pos[i], width, height))
+            pygame.draw.rect(self.screen, [255, 255, 0], elevator_rect[i])
 
-
-'''
-def draw_normal_building(simulation):
-    for i, elevator_floor in enumerate(x.curr_floor for x in simulation.elevators):
-        y_pos[i] -= elevator_floor * y_move
-
-def draw_optimized_building(simulation):
-    for i, elevator_floor in enumerate():
-        y_pos[i] -= elevator_floor * y_move
-'''
-
-
+"""
 
 def drawBuilding(mode, maxFloors):
 
@@ -122,7 +129,7 @@ def draw(elevators_floor):
 
     for i in range(3):
         normalRect[i] = pygame.rect.Rect((x_pos[i], y_pos[i], width, height))
-        optimizedRect[i] = pygame.rect.Rect((x_pos[i]+ 350, y_pos[i], width, height))
+        optimizedRect[i] = pygame.rect.Rect((x_pos[i] + 350, y_pos[i], width, height))
 
         pygame.draw.rect(screen, [255, 255, 0], normalRect[i])
         pygame.draw.rect(screen, [0, 255, 0], optimizedRect[i])
@@ -144,3 +151,4 @@ while True:
         for j in range (maxFloors):
             for k in range (maxFloors):
                 draw([i,j,k])
+"""

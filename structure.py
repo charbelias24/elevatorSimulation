@@ -1,7 +1,8 @@
 from random import randint, choice
 from threading import Thread
 from time import sleep
-from visual import draw
+
+
 
 
 class Simulation:
@@ -228,7 +229,7 @@ class Simulation:
                 elevator.set_relevant_direction()
             if self.visual:
                 self.visualize()
-                draw(elevator.curr_floor for elevator in self.elevators)
+                #draw()
             self.make_people_leave_floors()
             self.people_floors_to_elev()
             self.calculate_wait_time()
@@ -238,7 +239,7 @@ class Simulation:
 
             if self.visual:
                 sleep(Simulation.step)
-                draw(elevator.curr_floor for elevator in self.elevators)
+                #draw(elevator.curr_floor for elevator in self.elevators)
                 self.visualize()
 
             elev_thread = []
