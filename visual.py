@@ -17,6 +17,7 @@ class Visual:
         self.base = pygame.image.load("pictures/base.png")
         self.floor = pygame.image.load("pictures/floor.png")
         self.roof = pygame.image.load("pictures/roof.png")
+        self.background = pygame.image.load("pictures/background.png")
         self.x_addition = 350
 
     def draw(self):
@@ -25,7 +26,7 @@ class Visual:
                 if event.type == pygame.QUIT: sys.exit()
 
             self.screen.fill(self.white)
-
+            #self.screen.blit(self.background)
             self.draw_building(optimized=0)
             self.draw_building(optimized=1)
 
@@ -80,8 +81,6 @@ class Visual:
             self.screen.blit(self.floor, (x, (self.base_y - 12) - (i * 12)))
         self.screen.blit(self.roof, (x, (self.base_y - 12) - ((Simulation.total_floors) * 12)))
         self.screen.blit(self.floor, (x, (self.base_y + 40)))
-
-        #self.draw_floor_people(optimized)
 
     def draw_elevator_square(self, optimized):
         x = self.base_x + 5
