@@ -3,9 +3,6 @@ import sys, pygame
 
 import time
 
-#maxFloors = int(input ("please enter the height of the building : "))
-font = pygame.font.SysFont("Arial", 14, True, False)
-
 class Visual:
     def __init__(self, simulations):
         pygame.init()
@@ -21,27 +18,23 @@ class Visual:
         self.floor = pygame.image.load("pictures/floor.png")
         self.roof = pygame.image.load("pictures/roof.png")
         self.x_addition = 350
-        #self.font = pygame.font.SysFont('Arial', 14, True , False)
 
     def draw(self):
-        font = pygame.font.SysFont("Calibri", 14, True, False)
-
-
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: sys.exit()
 
+            self.screen.fill(self.white)
+
             self.draw_building(optimized=0)
             self.draw_building(optimized=1)
 
+            #font = pygame.font.SysFont('Arial', 25 , True, False)
+            #text = font.render("MTASDA", True ,self.black)
+            #self.screen.blit(text, [250,250])
+
             self.draw_elevator_square(optimized=0)
             self.draw_elevator_square(optimized=1)
-
-            #self.draw_floor_people(optimized=0)
-            #self.draw_floor_people(optimized=1)
-
-            d = font.render(str("BL"), True, self.black)
-            self.screen.blit(d, [self.base_x - 10, ((self.base_y - 10) - 12)])
 
             pygame.display.flip()
             sleep(0.5)
