@@ -4,6 +4,7 @@ import sys, pygame
 import time
 
 #maxFloors = int(input ("please enter the height of the building : "))
+font = pygame.font.SysFont("Arial", 14, True, False)
 
 class Visual:
     def __init__(self, simulations):
@@ -19,13 +20,16 @@ class Visual:
         self.base = pygame.image.load("pictures/base.png")
         self.floor = pygame.image.load("pictures/floor.png")
         self.roof = pygame.image.load("pictures/roof.png")
-        #self.font = pygame.font.SysFont("Calibri", 14, True, False)
+        self.x_addition = 350
+        #self.font = pygame.font.SysFont('Arial', 14, True , False)
 
     def draw(self):
+        font = pygame.font.SysFont("Calibri", 14, True, False)
+
+
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: sys.exit()
-            self.screen.fill(self.white)
 
             self.draw_building(optimized=0)
             self.draw_building(optimized=1)
@@ -33,17 +37,33 @@ class Visual:
             self.draw_elevator_square(optimized=0)
             self.draw_elevator_square(optimized=1)
 
+            #self.draw_floor_people(optimized=0)
+            #self.draw_floor_people(optimized=1)
+
+            d = font.render(str("BL"), True, self.black)
+            self.screen.blit(d, [self.base_x - 10, ((self.base_y - 10) - 12)])
+
             pygame.display.flip()
             sleep(0.5)
 
+    def draw_floor_people(self, optimized):
+        floor_people = {}
+        font = pygame.font.SysFont('Arial', 14, True, False)
+        x_addition = self.x_addition if optimized else 0
+        for i, floor in enumerate(self.simulations[optimized].floors.values()):
+            floor_people[i] = font.render(str(floor.floor_nb), True, self.black)
+            self.screen.blit(floor_people[i], [self.base_x - 10 + x_addition, ((self.base_y - 10) - 12 * i)])
+
     def draw_building(self, optimized):
-        x = self.base_x + 350 if optimized else self.base_x
+        x = self.base_x + self.x_addition if optimized else self.base_x
         self.screen.blit(self.base, (x - 4, self.base_y))
 
         for i in range (0, Simulation.total_floors):
             self.screen.blit(self.floor, (x, (self.base_y - 12) - (i * 12)))
         self.screen.blit(self.roof, (x, (self.base_y - 12) - ((Simulation.total_floors + 1) * 12)))
         self.screen.blit(self.floor, (x, (self.base_y + 40)))
+
+        #self.draw_floor_people(optimized)
 
     def draw_elevator_square(self, optimized):
         x = self.base_x + 5
