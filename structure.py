@@ -3,14 +3,13 @@ from threading import Thread
 from time import sleep
 
 
-class Simulation():
-    total_floors = 7
+class Simulation:
+    total_floors = 6
     total_elevators = 3
     max_people_per_step = 2
-    max_people_in_hotel = 10
-    max_people_generated = 20
+    max_people_generated = 40
 
-    step = 0.1  # each elevator step is 1 second
+    step = 0.5  # each elevator step is 1 second
 
     def __init__(self, mode, visual=True):
         self.mode = mode
@@ -40,7 +39,6 @@ class Simulation():
             direction = randint(-1, Simulation.total_floors)
             if direction >= 0:
                 direction = 1
-            # testing = randint(-1,Simulation.total_floors - 1)
             self.floors['0'].people.append(Person(direction=direction))
             self.total_people_count += 1
             self.available_people_count += 1
@@ -94,14 +92,27 @@ class Simulation():
 
         return best_elevator
 
+    def there_is_elev_at_gf(self, floor, person):
+        list_of_elevators_at_gf = list(filter(lambda x:x.curr_floor == 0, self.elevators))
+        if not list_of_elevators_at_gf:
+            for elevator in list(filter(lambda x:x.curr_floor != 0, self.elevators)):
+                if elevator.people == 0:
+                    elevator.curr_dest.clear()
+                    elevator.curr_dest.add(0)
+                    print("'" * 40)
+                    return elevator
+        return 0
+
     def elevator_available(self, floor, person):
         """ returns the best elevator for each person
         """
-        priority_elevators = [self.there_is_elev_on_person_floor,
+        priority_elevators = [self.there_is_elev_at_gf,
+                              self.there_is_elev_on_person_floor,
                               self.there_is_elev_on_same_route_as_person,
                               self.there_is_elev_below_or_above_person,
                               self.there_is_elev_none_of_above]
-
+        #if self.mode == 1:
+        #    priority_elevators.remove(self.there_is_elev_below_or_above_person)
         for choose_elevator in priority_elevators:
             best_elevator = choose_elevator(floor, person)
             if best_elevator:
@@ -181,7 +192,11 @@ class Simulation():
     def display_results(self):
         print()
         print("-*" * 30)
-        print("MODE: ", self.mode)
+        print("MODE: ", end="")
+        if self.mode:
+            print("OPTIMIZED TO GF")
+        else:
+            print("NORMAL")
         print("Total wait time at GF:", self.gf_wait_time)
         print("Total wait time at OT:", self.other_wait_time)
         print("Total steps of elevators from GF:", self.nb_times_elevator_used_from_gf)
@@ -190,7 +205,7 @@ class Simulation():
             print("Average waiting time at GF:", self.gf_wait_time / self.nb_times_elevator_used_from_gf)
             print("Average waiting time at OT:", self.other_wait_time / self.nb_times_elevator_used_from_other)
         except ZeroDivisionError:
-            print("People left too early")
+            print("Still too early to get these data!")
         print("-*" * 30)
 
     def visualize(self):
@@ -215,21 +230,17 @@ class Simulation():
             print()
 
     def start_elevator(self):
-        first_time = True
         while self.available_people_count or self.total_people_count < Simulation.max_people_generated:
-            # Testing
 
             if self.total_people_count < Simulation.max_people_generated:
                 self.generate_people_at_gf()
 
-            # Needs fixingg
-            #if Person.total_count:
-            #    first_time = False
-
             for elevator in self.elevators:
                 elevator.set_relevant_direction()
             if self.visual:
-                self.visualize()
+                #self.visualize()
+                self.display_results()
+
             self.make_people_leave_floors()
             self.people_floors_to_elev()
             self.calculate_wait_time()
@@ -239,7 +250,8 @@ class Simulation():
 
             if self.visual:
                 sleep(Simulation.step)
-                self.visualize()
+                self.display_results()
+                #self.visualize()
 
             elev_thread = []
             for i, elevator in enumerate(self.elevators):
