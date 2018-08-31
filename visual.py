@@ -10,13 +10,13 @@ class Visual:
         self.size = width, height = 720, 720
         self.speed = [2, 2]
         self.white = 255, 255, 255
-        self.black = 0, 0, 0
-        self.base_y = 500
-        self.base_x = 160
+        self.black = 255, 255, 255
+        self.base_y = 453
+        self.base_x = 120
         self.screen = pygame.display.set_mode(self.size)
-        self.base = pygame.image.load("pictures/base.png")
-        self.floor = pygame.image.load("pictures/floor.png")
-        self.roof = pygame.image.load("pictures/roof.png")
+        self.base = pygame.image.load("pictures/base copy.png")
+        self.floor = pygame.image.load("pictures/floor copy.png")
+        self.roof = pygame.image.load("pictures/roof copy.png")
         self.background = pygame.image.load("pictures/background.png")
         self.x_addition = 350
 
@@ -26,7 +26,9 @@ class Visual:
                 if event.type == pygame.QUIT: sys.exit()
 
             self.screen.fill(self.white)
-            self.screen.blit(self.background)
+
+            self.screen.blit(self.background, [0,0])
+
             self.draw_building(optimized=0)
             self.draw_building(optimized=1)
 
@@ -38,6 +40,9 @@ class Visual:
 
             self.draw_elevator_people(optimized=0)
             self.draw_elevator_people(optimized=1)
+
+            self.write_info(optimized=0)
+            self.write_info(optimized=1)
 
             self.draw_elevator_square(optimized=0)
             self.draw_elevator_square(optimized=1)
@@ -73,6 +78,19 @@ class Visual:
             elevator_people[i] = font.render(str(len(elevator.people)), True, self.black)
             self.screen.blit(elevator_people[i], [(self.base_x + 9 + (20 * i)) + x_addition, self.base_y + 25])
 
+    def write_info(self, optimized):
+
+        font = pygame.font.SysFont('Arial', 14, True, False)
+        x_addition = self.x_addition if optimized else 0
+
+        average_waiting_timeGF = font.render(str(1), True, self.black)
+        average_waiting_time = font.render(str(1), True, self.black)
+        total_steps = font.render(str(len(1), True, self.black)
+
+        self.screen.blit(("Average wait time at GF = " + average_waiting_timeGF), [(self.base_x  + x_addition), (self.base_y + 25)])
+        self.screen.blit("Average wait time at OTHER = " + average_waiting_time, [self.base_x  + x_addition, self.base_y + 25])
+        self.screen.blit("Total Steps : " + average_waiting_time, [self.base_x  + x_addition, self.base_y + 25])
+
     def draw_building(self, optimized):
         x = self.base_x + self.x_addition if optimized else self.base_x
         self.screen.blit(self.base, (x - 4, self.base_y))
@@ -80,7 +98,6 @@ class Visual:
         for i in range (0, Simulation.total_floors - 1):
             self.screen.blit(self.floor, (x, (self.base_y - 12) - (i * 12)))
         self.screen.blit(self.roof, (x, (self.base_y - 12) - ((Simulation.total_floors) * 12)))
-        self.screen.blit(self.floor, (x, (self.base_y + 40)))
 
     def draw_elevator_square(self, optimized):
         x = self.base_x + 5
