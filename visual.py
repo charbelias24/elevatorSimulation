@@ -35,6 +35,9 @@ class Visual:
             self.draw_floor_people(optimized=0)
             self.draw_floor_people(optimized=1)
 
+            self.draw_elevator_people(optimized=0)
+            self.draw_elevator_people(optimized=1)
+
             self.draw_elevator_square(optimized=0)
             self.draw_elevator_square(optimized=1)
 
@@ -59,6 +62,15 @@ class Visual:
         for i, floor in enumerate(list(self.simulations[optimized].floors.values())[::-1]):
             floor_people[i] = font.render(str(len(floor.people)), True, self.black)
             self.screen.blit(floor_people[i], [self.base_x + 75 + x_addition, ((self.base_y + 12) - 12 * i)])
+
+    def draw_elevator_people(self, optimized):
+        elevator_people = {}
+        font = pygame.font.SysFont('Arial', 14, True, False)
+        x_addition = self.x_addition if optimized else 0
+
+        for i, elevator in enumerate(self.simulations[optimized].elevators):
+            elevator_people[i] = font.render(str(len(elevator.people)), True, self.black)
+            self.screen.blit(elevator_people[i], [(self.base_x + 9 + (20 * i)) + x_addition, self.base_y + 25])
 
     def draw_building(self, optimized):
         x = self.base_x + self.x_addition if optimized else self.base_x
