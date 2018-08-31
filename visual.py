@@ -32,6 +32,9 @@ class Visual:
             self.draw_floor_number(optimized=0)
             self.draw_floor_number(optimized=1)
 
+            #self.draw_floor_people(optimized=0)
+            self.draw_floor_people(optimized=1)
+
             self.draw_elevator_square(optimized=0)
             self.draw_elevator_square(optimized=1)
 
@@ -39,14 +42,23 @@ class Visual:
             sleep(0.5)
 
     def draw_floor_number(self, optimized):
-        floor_people = {}
+        floor_number = {}
         font = pygame.font.SysFont('Arial', 14, True, False)
         x_addition = self.x_addition if optimized else 0
         tmp = len(self.simulations[optimized].floors.values())
 
         for i, floor in enumerate(self.simulations[optimized].floors.values()):
-            floor_people[i] = font.render(str(tmp - floor.floor_nb - 3), True, self.black)
-            self.screen.blit(floor_people[i], [self.base_x - 15 + x_addition, ((self.base_y + 12) - 12 * i)])
+            floor_number[i] = font.render(str(tmp - floor.floor_nb - 3), True, self.black)
+            self.screen.blit(floor_number[i], [self.base_x - 15 + x_addition, ((self.base_y + 12) - 12 * i)])
+
+    def draw_floor_people(self, optimized):
+        floor_people = {}
+        font = pygame.font.SysFont('Arial', 14, True, False)
+        x_addition = self.x_addition if optimized else 0
+
+        for i, floor in enumerate(self.simulations[optimized].floors.values()):
+            floor_number[i] = font.render(str(len(floor.people)), True, self.black)
+            self.screen.blit(floor_number[i], [self.base_x + 45 + x_addition, ((self.base_y + 12) - 12 * i)])
 
     def draw_building(self, optimized):
         x = self.base_x + self.x_addition if optimized else self.base_x
