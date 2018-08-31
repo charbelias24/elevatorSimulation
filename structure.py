@@ -3,7 +3,7 @@ from threading import Thread
 from time import sleep
 
 
-class Simulation:
+class Simulation():
     total_floors = 7
     total_elevators = 3
     max_people_per_step = 2
@@ -12,14 +12,19 @@ class Simulation:
 
     step = 0.1  # each elevator step is 1 second
 
-    def __init__(self, mode):
+    def __init__(self, mode, visual=True):
         self.mode = mode
+        self.visual = visual
         self.floors = {}
         self.elevators = []
         self.nb_times_elevator_used_from_gf = 0
         self.nb_times_elevator_used_from_other = 0
         self.gf_wait_time = 0
         self.other_wait_time = 0
+        self.total_people_count = 0
+        self.available_people_count = 0
+        self.total_elevator_steps = 0
+
         # Generating the elevators
         for _ in range(Simulation.total_elevators):
             self.elevators.append(Elevator())
@@ -37,13 +42,8 @@ class Simulation:
                 direction = 1
             # testing = randint(-1,Simulation.total_floors - 1)
             self.floors['0'].people.append(Person(direction=direction))
-
-    def generate_people_at_gf_steps(self):
-        """ generate people at gf every one step until the max is reached
-        """
-        while Person.available_count < Simulation.max_people_generated:
-            self.generate_people_at_gf()
-            sleep(self.step)
+            self.total_people_count += 1
+            self.available_people_count += 1
 
     def there_is_elev_on_person_floor(self, floor, person):
         best_elevator = 0
@@ -61,7 +61,7 @@ class Simulation:
         for elevator in self.elevators:
             if len(elevator.people) < Elevator.max_nb_people and \
                     person.on_the_elev_route(floor, elevator) and \
-                            abs(elevator.curr_floor - person.curr_floor) < min_distance:
+                    abs(elevator.curr_floor - person.curr_floor) < min_distance:
                 min_distance = abs(elevator.curr_floor - person.curr_floor)
                 best_elevator = elevator
 
@@ -75,7 +75,7 @@ class Simulation:
                             abs(elevator.curr_floor - person.curr_floor) < min_distance and \
                     (elevator.direction == 1 and person.curr_floor >= max(elevator.curr_dest)) or \
                     (elevator.direction == -1 and person.curr_floor <= min(elevator.curr_dest)):
-                ####CHECK####
+                # CHECK####
                 min_distance = abs(elevator.curr_floor - person.curr_floor)
                 best_elevator = elevator
 
@@ -88,7 +88,7 @@ class Simulation:
             if len(elevator.people) < Elevator.max_nb_people and \
                             abs(elevator.curr_floor - person.curr_floor) < min_distance:
                 # not elevator.curr_dest:
-                ####CHECK####
+                # CHECK####
                 min_distance = abs(elevator.curr_floor - person.curr_floor)
                 best_elevator = elevator
 
@@ -107,7 +107,7 @@ class Simulation:
             if best_elevator:
                 return best_elevator
 
-                # add the additional elevator cases
+        # add the additional elevator cases
 
     def people_floor_to_elev(self, floor):
         possible_people = list(filter(lambda x: x.direction != 0, floor.people))
@@ -122,13 +122,7 @@ class Simulation:
                             self.nb_times_elevator_used_from_gf += 1
                         else:
                             self.nb_times_elevator_used_from_other += 1
-
-                        # print("{} just used the elevator at floor {}".format(person.id, floor.floor_nb))
                         i -= 1
-            else:
-                pass
-                # print("No elevator available to take you out!")
-                # self.person_floor_to_elev(floor, possible_people[i])
 
     def people_floors_to_elev(self):
         for floor in self.floors.values():
@@ -141,7 +135,7 @@ class Simulation:
         person.in_elevator = False
         person.curr_floor = person.curr_dest
         elev.remove_curr_floor_from_dest()
-        person.check_leave_hotel(self.floors[str(elev.curr_floor)])
+        self.check_leave_hotel(person, self.floors[str(elev.curr_floor)])
 
     def people_elev_to_floor(self, elev):
         for person in list(filter(lambda x: x.curr_dest == elev.curr_floor, elev.people))[::-1]:
@@ -155,6 +149,10 @@ class Simulation:
         for floor in self.floors.values():
             floor.people_want_to_leave()
 
+    def send_elev_to_gf(self):
+        for elevator in self.elevators:
+            elevator.send_to_gf()
+
     def calculate_wait_time(self):
         for floor in self.floors.values():
             for person in list(filter(lambda x: x.direction != 0, floor.people)):
@@ -164,51 +162,36 @@ class Simulation:
                 else:
                     self.other_wait_time += 1
 
+    def check_leave_hotel(self, person, floor):
+        if person.leave_hotel:
+            floor.remove_person(person)
+            self.available_people_count -= 1
+            del person
+
+    def move_elevator(self, elevator):
+        elevator.set_relevant_direction()
+        if  elevator.direction == 1:
+            elevator.curr_floor += 1
+            self.total_elevator_steps += 1
+        elif elevator.direction == -1:
+            elevator.curr_floor -= 1
+            self.total_elevator_steps += 1
+        elevator.remove_curr_floor_from_dest()
+
     def display_results(self):
         print()
         print("-*" * 30)
+        print("MODE: ", self.mode)
         print("Total wait time at GF:", self.gf_wait_time)
         print("Total wait time at OT:", self.other_wait_time)
         print("Total steps of elevators from GF:", self.nb_times_elevator_used_from_gf)
         print("Total steps of elevators from OT:", self.nb_times_elevator_used_from_other)
-        print("Average waiting time at GF:", self.gf_wait_time / self.nb_times_elevator_used_from_gf)
-        print("Average waiting time at OT:", self.other_wait_time / self.nb_times_elevator_used_from_other)
+        try:
+            print("Average waiting time at GF:", self.gf_wait_time / self.nb_times_elevator_used_from_gf)
+            print("Average waiting time at OT:", self.other_wait_time / self.nb_times_elevator_used_from_other)
+        except ZeroDivisionError:
+            print("People left too early")
         print("-*" * 30)
-
-    def start_elevator(self):
-        first_time = True
-        while Person.available_count or first_time:
-            # Testing
-
-            if Person.total_count < Simulation.max_people_generated:
-                self.generate_people_at_gf()
-
-            if Person.total_count:
-                first_time = False
-
-            for elevator in self.elevators:
-                elevator.set_relevant_direction()
-
-            self.visualize()
-            self.make_people_leave_floors()
-            self.people_floors_to_elev()
-            self.calculate_wait_time()
-            self.people_elevs_to_floor()
-
-            sleep(Simulation.step)
-            self.visualize()
-
-            elev_thread = []
-            for i, elevator in enumerate(self.elevators):
-                elev_thread.append(Thread(target=elevator.move_elevator))
-                elev_thread[i].start()
-
-            for i in range(Simulation.total_elevators):
-                elev_thread[i].join()
-
-            sleep(Simulation.step)
-        self.display_results()
-
 
     def visualize(self):
         print("*" * 30)
@@ -231,10 +214,47 @@ class Simulation:
                 # print("P{}".format(per.id), end=" ")
             print()
 
+    def start_elevator(self):
+        first_time = True
+        while self.available_people_count or self.total_people_count < Simulation.max_people_generated:
+            # Testing
+
+            if self.total_people_count < Simulation.max_people_generated:
+                self.generate_people_at_gf()
+
+            # Needs fixingg
+            #if Person.total_count:
+            #    first_time = False
+
+            for elevator in self.elevators:
+                elevator.set_relevant_direction()
+            if self.visual:
+                self.visualize()
+            self.make_people_leave_floors()
+            self.people_floors_to_elev()
+            self.calculate_wait_time()
+            self.people_elevs_to_floor()
+            if self.mode == 1:
+                self.send_elev_to_gf()
+
+            if self.visual:
+                sleep(Simulation.step)
+                self.visualize()
+
+            elev_thread = []
+            for i, elevator in enumerate(self.elevators):
+                elev_thread.append(Thread(target=self.move_elevator, args=[elevator,] ))
+                elev_thread[i].start()
+
+            for i in range(Simulation.total_elevators):
+                elev_thread[i].join()
+
+            if self.visual:
+                sleep(Simulation.step)
+        self.display_results()
 
 class Person:
     total_count = 0
-    available_count = 0
 
     def __init__(self, direction=0, curr_floor=0, curr_dest=0, leave_hotel=0):
         self.direction = direction
@@ -244,24 +264,19 @@ class Person:
         self.id = Person.total_count
         self.in_elevator = False
         self.wait_time = 0
-        Person.available_count += 1
-        Person.total_count += 1
 
-    def __del__(self):
-        Person.available_count -= 1
+        Person.total_count += 1
 
     def choose_curr_dest(self):
         """ Choose a random destination floor from the list of possible floors
         """
         possible_dest = []
-        # print("ID:", self.id,"Dir:",self.direction)
         if self.direction == 1:
             possible_dest = list(range(self.curr_floor + 1, Simulation.total_floors))
         elif self.direction == -1:
             possible_dest = list(range(0, self.curr_floor)) * 3
             possible_dest.append(-1)
             possible_dest.extend([0] * 5)
-            # print(possible_dest)
         self.curr_dest = choice(possible_dest)
         if not self.curr_dest:
             self.leave_hotel = 1
@@ -282,14 +297,12 @@ class Person:
         elevator.add_person(self)
         elevator.curr_dest.add(self.choose_curr_dest())
         self.in_elevator = True
-        # elevator.set_relevant_direction()
 
     def on_the_elev_route(self, floor, elevator):
-        if (elevator.direction == self.direction == 1 and \
-                            elevator.curr_floor <= self.curr_floor <= max(elevator.curr_dest)) or \
-                (elevator.direction == self.direction == -1 and \
-                                 min(elevator.curr_dest) <= self.curr_floor <= elevator.curr_floor):
-            # print("FOUND ELEVATOR THAT HAS THE SAME ROUTE AS MINE", self.id)
+        if (elevator.direction == self.direction == 1 and
+                elevator.curr_floor <= self.curr_floor <= max(elevator.curr_dest)) or \
+                (elevator.direction == self.direction == -1 and
+                min(elevator.curr_dest) <= self.curr_floor <= elevator.curr_floor):
             return True
         else:
             return False
@@ -300,19 +313,12 @@ class Person:
         elif self.direction == -1 and self.curr_floor == -1:
             self.direction = 1
 
-    def check_leave_hotel(self, floor):
-        if self.leave_hotel:
-            floor.remove_person(self)
-            del self
-
     def increment_wait_time(self):
         if self.direction and not self.in_elevator:
             self.wait_time += 1
-        #print("{} is waiting at the floor {} for {}s".format(self.id, self.curr_floor, self.wait_time))
 
 
 class Elevator:
-    total_steps = 0
     max_nb_people = 8
 
     def __init__(self, direction=0, curr_floor=0):
@@ -332,7 +338,6 @@ class Elevator:
             self.curr_dest.add(person.curr_floor)
             return True
         return False
-        # should i change the direction too?
 
     def set_relevant_direction(self):
         tmp_curr_dest = []
@@ -364,19 +369,15 @@ class Elevator:
         else:
             self.direction = 0
 
-    def move_elevator(self):
-        self.set_relevant_direction()
-        if self.direction == 1:
-            self.curr_floor += 1
-            Elevator.total_steps += 1
-        elif self.direction == -1:
-            self.curr_floor -= 1
-            Elevator.total_steps += 1
-        self.remove_curr_floor_from_dest()
+
 
     def remove_curr_floor_from_dest(self):
         if self.curr_floor in self.curr_dest:
             self.curr_dest.remove(self.curr_floor)
+
+    def send_to_gf(self):
+        if self.curr_floor and not self.curr_dest:
+            self.curr_dest.add(0)
 
 
 class Floor:
@@ -392,7 +393,7 @@ class Floor:
 
     def people_want_to_leave(self):
         if self.people and choice((0, 1)) and self.floor_nb:
-            nb_people_leaving = randint(0, int(max(min(5, len(self.people) / 4), 1)))
+            nb_people_leaving = randint(0, int(max(min(5, int(len(self.people) / 4)), 1)))
             for i in range(int(nb_people_leaving)):
                 # print("Changing direction of someone")
                 tmp_person_choice = choice(self.people)
