@@ -192,7 +192,11 @@ class Simulation:
     def display_results(self):
         print()
         print("-*" * 30)
-        print("MODE: ", self.mode)
+        print("MODE: ", end="")
+        if self.mode:
+            print("OPTIMIZED TO GF")
+        else:
+            print("NORMAL")
         print("Total wait time at GF:", self.gf_wait_time)
         print("Total wait time at OT:", self.other_wait_time)
         print("Total steps of elevators from GF:", self.nb_times_elevator_used_from_gf)
@@ -201,7 +205,7 @@ class Simulation:
             print("Average waiting time at GF:", self.gf_wait_time / self.nb_times_elevator_used_from_gf)
             print("Average waiting time at OT:", self.other_wait_time / self.nb_times_elevator_used_from_other)
         except ZeroDivisionError:
-            print("People left too early")
+            print("Still too early to get these data!")
         print("-*" * 30)
 
     def visualize(self):
@@ -227,19 +231,15 @@ class Simulation:
 
     def start_elevator(self):
         while self.available_people_count or self.total_people_count < Simulation.max_people_generated:
-            # Testing
 
-            #if self.total_people_count < Simulation.max_people_generated:
-             #   self.generate_people_at_gf()
-
-            # Needs fixingg
-            #if Person.total_count:
-            #    first_time = False
+            if self.total_people_count < Simulation.max_people_generated:
+                self.generate_people_at_gf()
 
             for elevator in self.elevators:
                 elevator.set_relevant_direction()
             if self.visual:
-                self.visualize()
+                #self.visualize()
+                self.display_results()
 
             self.make_people_leave_floors()
             self.people_floors_to_elev()
@@ -250,6 +250,7 @@ class Simulation:
 
             if self.visual:
                 sleep(Simulation.step)
+                self.display_results()
                 self.visualize()
 
             elev_thread = []
@@ -414,17 +415,3 @@ class Floor:
                     tmp_person_choice.direction = -1
                 else:
                     tmp_person_choice.direction = choice((-1, -1, -1, 1))
-
-def generate_people(simulations):
-    while simulations[0].available_people_count or \
-            simulations[0].total_people_count < Simulation.max_people_generated:
-        #print("bla")
-        for _ in range(0, randint(0, Simulation.max_people_per_step)):
-            direction = randint(-1, Simulation.total_floors)
-            if direction >= 0:
-                direction = 1
-            for simulation in simulations:
-                simulation.floors['0'].people.append(Person(direction=direction))
-                simulation.total_people_count += 1
-                simulation.available_people_count += 1
-        sleep(Simulation.step)
