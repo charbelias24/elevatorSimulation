@@ -57,8 +57,8 @@ class Visual:
         x_addition = self.x_addition if optimized else 0
 
         for i, floor in enumerate(self.simulations[optimized].floors.values()):
-            floor_number[i] = font.render(str(len(floor.people)), True, self.black)
-            self.screen.blit(floor_number[i], [self.base_x + 45 + x_addition, ((self.base_y + 12) - 12 * i)])
+            floor_people[i] = font.render(str(len(floor.people)), True, self.black)
+            self.screen.blit(floor_people[i], [self.base_x + 45 + x_addition, ((self.base_y + 12) - 12 * i)])
 
     def draw_building(self, optimized):
         x = self.base_x + self.x_addition if optimized else self.base_x
